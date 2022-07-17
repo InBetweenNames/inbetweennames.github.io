@@ -1,0 +1,59 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=generator content="Hugo 0.101.0"><title>Interstate '76/Nitro pack netcode patches - Shane Peelar's Blog</title><meta name=description content="Patches to allow you to play Multiplayer Interstate'76/Nitro Pack once again"><style>:root{--bg-color:floralwhite;--fg-color:#1c6e8c;--text-color:#444;--heading-color:#222;--tagline-color:#898989;--top-sep-color:#888888;--date-color:#666;--bar-nav-color:#777}</style><link rel=stylesheet href=/css/normalize.css><link rel=stylesheet href=/css/ui.css><link rel=stylesheet href=/css/iosevka.css><link rel=stylesheet href=/css/syntax.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Fira+Mono|Raleway"><script type=text/javascript>var _paq=window._paq=window._paq||[];_paq.push(["disableCookies"]),_paq.push(["trackPageView"]),_paq.push(["enableLinkTracking"]),function(){t="https://matomo.inbetweennames.net/",_paq.push(["setTrackerUrl",t+"matomo.php"]),_paq.push(["setSiteId","1"]);var t,n=document,e=n.createElement("script"),s=n.getElementsByTagName("script")[0];e.type="text/javascript",e.async=!0,e.src=t+"matomo.js",s.parentNode.insertBefore(e,s)}()</script><noscript><p><img src="https://matomo.inbetweennames.net//matomo.php?idsite=1&rec=1" style=border:0 alt></p></noscript></head><body><header class="container no-print"><div class=u-header><nav class=bar><ul><li><a href=/><img class=icon-text src=/img/prev.svg></a></li><li><a href=/about/>About</a></li><li><a href=/cv/>CV</a></li><li><a href=/projects/>Projects</a></li></ul></nav><hr class=topsep></div></header><main class=container><article><header><hgroup id=brand><h1>Interstate '76/Nitro pack netcode patches</h1><h5><span class=no-print>-
+<a href=/tags/i76>i76</a></span></h5></hgroup><hr class=sep></header><p>This page was brought over from my old <a href=https://cs.uwindsor.ca/~peelar>cs.uwindsor.ca/~peelar</a> home page.
+The information presented here is still accurate, however, if you want to try these patches,
+I encourage you to download one of the patch bundles from <a href=http://interstate76.com>interstate76.com</a>
+instead of dragging and dropping the files here into your installation, as you will get a few other
+goodies as well that way.</p><h1 id=introduction>Introduction</h1><p>These Interstate 76/Nitro Pack game modifications allow you to once again
+play games over the internet with other people, without requiring
+your machine to be directly connected to the net. Yes, that&rsquo;s right,
+you can now play Interstate and possibly other ANet2-based Activision
+games behind a NAT! The only caveat is that your NAT needs to support UPnP.</p><p>There are two separate patches for Nitro and Interstate 76 respectively.</p><h1 id=nitro-pack-patchhttpspeelarmywebcsuwindsorcawinets2_v3zip><a href=https://peelar.myweb.cs.uwindsor.ca/winets2_v3.zip>Nitro Pack Patch</a></h1><p>This patch was a modification of the ANet source code released by Dan Kegel to add UPnP support to the game, thus
+eliminating the need to manually forward ports to play Nitro. The UPnP support is provided via the
+open-source <a href=https://github.com/miniupnp/miniupnp>miniupnpc</a> library. I believe this patch
+could also be used to provide UPnP benefits to other anet2-based games, too (looking at you, Battlezone).</p><p>You do need to use an ANet2 server to play if you use this patch, however. Fortunately, there are many
+available, including the recommended battlezone1.net server. To play, just select &ldquo;battlezone1.net&rdquo;
+from the server list when you host or join a game, and you&rsquo;ll be able to see other games once again.</p><h2 id=installation>Installation</h2><p>Just extract the files into the game directory, replacing <code>anet2.dll</code> and <code>winets2.dll</code>.</p><h2 id=source-codehttpspeelarmywebcsuwindsorcaanet-010-upnpzip><a href=https://peelar.myweb.cs.uwindsor.ca/anet-0.10-upnp.zip>Source Code</a></h2><p>I&rsquo;ve mirrored my modifications to WINETS2 here as per the GPL licence. Only winets2 was modified, and to
+build it you&rsquo;ll need Microsoft Visual C++ 6.0 or 5.0. To build miniupnpc, I used TDM-GCC 4.8.1.
+To link miniupnpc into winets2, I simply copied the compiled implib over to a place MSVC&rsquo;s linker would reach,
+and added it to the list of libraries to link in the winets.mak NMAKE file.</p><p>To solve
+the problem of structure packing being different in generated code for both compilers, I forced both compilers to
+treat the structures as tightly packed with appropriate compiler pragmas (<code>#pragma ms_struct</code> was not available on my
+build of of TDM-GCC).</p><h1 id=interstate-76-non-nitro-patchhttpspeelarmywebcsuwindsorcawinetdll><a href=https://peelar.myweb.cs.uwindsor.ca/WINET.DLL>Interstate 76 (non-Nitro) Patch</a></h1><p>Standard I76 can&rsquo;t play network games over IP over the internet, due to
+the game making assumptions about IP addresses that are invalid when
+Network Address Translation is happening (which is basically all of the
+time these days). This is the beta version of the patch, which
+should address this problem. It is currently largely untested, however
+in 1v1 matchups it has worked without problem. It should, in theory,
+allow clients to play behind NATs. This version removes the restriction
+of the preliminary version, namely &ldquo;one client per external IP address&rdquo;
+due to a new representation of IP addresses in the DLL (6 bytes instead
+of 4, to accomodate the 2 byte port number). There are still problems
+if there are clients that exist on the host&rsquo;s own network, however
+those will be addressed with a modified ANet matchmaking server, which
+is yet to be written. Otherwise, it seems to be working fine. Just
+make sure there are no clients on the host&rsquo;s network, and port 21157
+is forwarded to the host.</p><h2 id=installation-1>Installation</h2><p>To install, just drop this in the &ldquo;DLL&rdquo; folder of your Interstate 76 folder.
+Only Vanilla I76 has been tested (below 1.083). I have received word that
+the Gold edition also works, but I have not tried this. Nitro version is
+guaranteed to not work for the time being (working on this).
+Also, forward port 21157 on your router to your computer, if you are the host.
+Clients need not do this.
+To connect to an internet game, just enter the host&rsquo;s
+external IP address in the &ldquo;Join Game/Internet&rdquo; screen, and you&rsquo;ll see
+it listed. Enjoy!</p><h2 id=documentation-and-code>Documentation and Code</h2><p>Unfortunately, as I did not have any real source code from Interstate 76
+to begin with (aside from the sources of a much later and incompatible
+version of ANet found at <a href=http://kegel.com/anet>Dan Kegel&rsquo;s website</a>),
+the most I can release are my notes and debugging files. They are provided below:</p><ul><li><a href=https://peelar.myweb.cs.uwindsor.ca/Winet.udd>WINET.DLL udd file</a></li><li><a href=https://peelar.myweb.cs.uwindsor.ca/anetdll.udd>ANETDLL.DLL udd file</a></li><li><a href=https://peelar.myweb.cs.uwindsor.ca/blerh.txt>Notes on data structures used in both (contains some documentation of game operation too)</a></li></ul><p>The UDD files are intended to be used with OllyDbg Version 2.01 alpha 4.
+Drag these files to your OllyDbg installation folder before opening
+the WINET.DLL available for download on this page or the ANETDLL.DLL
+included with your game installation. These UDD files contain
+many comments about the code, and provide descriptive names for
+functions found in the assembly, as well as descriptions of function
+arguments.</p><h1 id=credits>Credits</h1><ul><li>Myself - Reverse-engineering, Coding, Testing</li><li>Rob Roddy - Consultation, Staying up until 3am regularly to help me test</li></ul><h1 id=acknowledgements>Acknowledgements</h1><ul><li>Oleh Yuschuk - For developing and releasing OllyDbg for free</li><li>Dan Kegel - For convincing Activision to allow him to open source
+ActiveNet, developing ActiveNet, and continuing to support the project
+even today. Interstate 76 uses a much earlier version, but these
+sources were still helpful in reverse engineering ANet and WINET.DLL</li></ul><h1 id=afterword>Afterword</h1><p>Did you find anything on this page especially useful or helpful? Did
+anything fail horribly or miserably? In either case, please let me
+know! I&rsquo;d be glad to hear from you.</p></article><nav class="no-print post-nav"><a class=next-post href=https://inbetweennames.net/projects/2021-05-05-comp3520/>2.5D Software Renderer Demo (COMP-3520 Computer Graphics Lab Materials)<img class=icon-text src=/img/next.svg></a></nav><section id=related><h4>See Also</h4><ul><li><a href=/blog/2021-05-06-i76rsqrt/>Fast reciprocal square root... in 1997?!</a></li><li><a href=/blog/2021-05-04-interstate-76-reverse-engineering-efforts-the-story-so-far/>Interstate '76 Reverse Engineering</a></li></ul></section><hr class=sep></main><footer class="container no-print"><div class=u-footer><div style=margin-bottom:2rem><a href=mailto:lookatyouhacker@gmail.com><img class=icon-sc src=/img/email.svg alt=E-mail></a>
+<a href=https://github.com/InBetweenNames/><img class=icon-sc src=/img/github.svg alt=GitHub></a>
+<a href=https://www.linkedin.com/in/shane-peelar-29a2005a/><img class=icon-sc src=/img/l_in.svg alt=LinkedIn></a></div><a href=https://inbetweennames.net/index.xml target=_blank><img class=icon-sc src=/img/feed.svg alt="RSS Feed"></a><p>Theme used: <a href=https://github.com/InBetweenNames/manis-hugo-theme>ManisIBN</a><br>&copy; 2022 Shane Peelar<div><a href=/privacypolicy/>Privacy Policy</a></div></p></div></footer></body></html>
